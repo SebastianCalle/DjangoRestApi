@@ -1,3 +1,6 @@
+import csv
+
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
@@ -173,8 +176,24 @@ class CreateUserAPIView(APIView):
 
     def post(self, request):
         user = request.data
+        user['username'] = request.data['email']
         serializer = UserSerializer(data=user)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CSVView(APIView):
+    def get(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="export.csv"'
+        writer = csv.DictWriter(response, fieldnames=['Document', 'Full Name', 'Count of Bill'])
+        writer.writeheader()
+        clients = Client.objects.all()
+        for client in clients:
+            count_bills = Bill.objects.filter(client_id=client.id).count()
+            writer.writerow({'Document': client.document,
+                             'Full Name': client.first_name + ' ' + client.last_name,
+                             'Count of Bill': count_bills})
+        return response

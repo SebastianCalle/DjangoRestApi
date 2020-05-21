@@ -12,4 +12,5 @@ urlpatterns = [
     path('bills-by-product/<int:pk>', views.BillByProductView.as_view()),
     path('bill-product/', views.BillProductView.as_view()),
     path('bill-product/<int:pk>', views.BillProductView.as_view()),
+    path('client-records', views.CSVView.as_view()),
 ]
