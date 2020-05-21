@@ -1,9 +1,10 @@
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Client, Product, Bill, BillProducts
-from .serializers import ClientSerializer, ProductSerializer, BillSerializer, BillProductsSerializer
+from .serializers import ClientSerializer, ProductSerializer, BillSerializer, BillProductsSerializer, UserSerializer
 
 
 class ClientView(APIView):
@@ -164,3 +165,16 @@ class BillProductView(APIView):
         bill_product = get_object_or_404(BillProducts.objects.all(), pk=pk)
         bill_product.delete()
         return Response({"message": "Bill-Product with id `{}` has been deleted.".format(pk)}, status=204)
+
+
+class CreateUserAPIView(APIView):
+    # Allow any user (authenticated or not) to access this url
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        user = request.data
+        serializer = UserSerializer(data=user)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
