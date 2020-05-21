@@ -21,6 +21,9 @@ class Product(models.Model):
     name = models.CharField('Name', max_length=50)
     description = models.CharField('Description', max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class Bill(models.Model):
     """
