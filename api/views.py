@@ -108,7 +108,7 @@ class BillByClientIdView(APIView):
 
 class ProductsByBillView(APIView):
     """
-    Class for manage Bill with
+    Class to manage relationship of products to bill
     """
     def get(self, request, pk):
         bills = BillProducts.objects.raw('SELECT * FROM api_billproducts WHERE bill_id_id = %s', [pk])
@@ -120,3 +120,29 @@ class ProductsByBillView(APIView):
             list_products.append(product_serializer.data)
         return Response(list_products)
 
+
+class BillByProductView(APIView):
+    """
+    Class to manage relationship of bill to product
+    """
+    def get(self, request, pk):
+        prodcut = BillProducts.objects.raw('SELECT * FROM api_billproducts WHERE product_id_id = %s', [pk])
+        serializer = BillProductsSerializer(prodcut, many=True)
+        list_bills = []
+        for obj in serializer.data:
+            bill = Bill.objects.raw('SELECT * FROM api_bill WHERE id = %s', [obj.get('bill_id')])
+            bill_serializer = BillSerializer(bill, many=True)
+            list_bills.append(bill_serializer.data)
+        return Response(list_bills)
+
+
+class BillProductView(APIView):
+    """
+    Class to manage relationship of bill to product
+    """
+    def post(self, request):
+        serializer = BillProductsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
