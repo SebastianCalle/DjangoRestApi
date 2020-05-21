@@ -34,6 +34,9 @@ class Bill(models.Model):
     nit = models.IntegerField()
     code = models.IntegerField()
 
+    def __str__(self):
+        return self.company_name
+
 
 class BillProducts(models.Model):
     """

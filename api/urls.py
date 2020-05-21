@@ -6,4 +6,6 @@ urlpatterns = [
     path('client/<int:pk>', views.ClientView.as_view()),
     path('product/', views.ProductView.as_view()),
     path('product/<int:pk>', views.ProductView.as_view()),
+    path('bill/', views.BillView.as_view()),
+    path('bill/<int:pk>', views.BillDetailView.as_view()),
 ]

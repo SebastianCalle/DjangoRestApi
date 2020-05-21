@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Client, Product
+from api.models import Client, Product, Bill
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -13,9 +13,18 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """
-    Serializer for model Client
+    Serializer for model Product
     """
     class Meta:
         model = Product
+        fields = '__all__'
+
+
+class BillSerializer(serializers.ModelSerializer):
+    """
+    Serializer for model Bill
+    """
+    class Meta:
+        model = Bill
         fields = '__all__'
 

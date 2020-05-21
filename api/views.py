@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Client, Product
-from .serializers import ClientSerializer, ProductSerializer
+from .models import Client, Product, Bill
+from .serializers import ClientSerializer, ProductSerializer, BillSerializer
 
 
 class ClientView(APIView):
@@ -64,5 +64,45 @@ class ProductView(APIView):
         product = get_object_or_404(Product.objects.all(), pk=pk)
         product.delete()
         return Response({"message": "Product with id `{}` has been deleted.".format(pk)}, status=204)
+
+
+class BillView(APIView):
+    """
+    Class for manage Bill
+    """
+    def get(self, request):
+        bills = Bill.objects.raw('SELECT * FROM api_bill')
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = BillSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BillDetailView(APIView):
+    """
+    Class for manage Bill with
+    """
+    def get(self, request, pk):
+        bills = Bill.objects.raw('SELECT * FROM api_bill WHERE client_id_id = %s', [pk])
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        bill_saved = get_object_or_404(Bill.objects.all(), pk=pk)
+        data = request.data
+        serializer = BillSerializer(instance=bill_saved, data=data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response({"success": "Bill with id '{}' updated successfully".format(pk)})
+
+    def delete(self, request, pk):
+        bill = get_object_or_404(Bill.objects.all(), pk=pk)
+        bill.delete()
+        return Response({"message": "Bill with id `{}` has been deleted.".format(pk)}, status=204)
 
 
