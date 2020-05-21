@@ -140,9 +140,27 @@ class BillProductView(APIView):
     """
     Class to manage relationship of bill to product
     """
+    def get(self, request):
+        bills_products = BillProducts.objects.raw('SELECT * FROM api_billproducts')
+        serializer = BillProductsSerializer(bills_products, many=True)
+        return Response(serializer.data)
+
     def post(self, request):
         serializer = BillProductsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        bill_product_saved = get_object_or_404(BillProducts.objects.all(), pk=pk)
+        data = request.data
+        serializer = BillProductsSerializer(instance=bill_product_saved, data=data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response({"success": "BIll-Product with id '{}' updated successfully".format(pk)})
+
+    def delete(self, request, pk):
+        bill_product = get_object_or_404(BillProducts.objects.all(), pk=pk)
+        bill_product.delete()
+        return Response({"message": "Bill-Product with id `{}` has been deleted.".format(pk)}, status=204)
