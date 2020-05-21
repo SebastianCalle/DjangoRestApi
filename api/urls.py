@@ -7,5 +7,6 @@ urlpatterns = [
     path('product/', views.ProductView.as_view()),
     path('product/<int:pk>', views.ProductView.as_view()),
     path('bill/', views.BillView.as_view()),
-    path('bill/<int:pk>', views.BillDetailView.as_view()),
+    path('bill-by-client/<int:pk>', views.BillByClientIdView.as_view()),
+    path('products-by-bill/<int:pk>', views.ProductsByBillView.as_view()),
 ]

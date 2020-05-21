@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Client, Product, Bill
-from .serializers import ClientSerializer, ProductSerializer, BillSerializer
+from .models import Client, Product, Bill, BillProducts
+from .serializers import ClientSerializer, ProductSerializer, BillSerializer, BillProductsSerializer
 
 
 class ClientView(APIView):
@@ -82,16 +82,6 @@ class BillView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
-
-class BillDetailView(APIView):
-    """
-    Class for manage Bill with
-    """
-    def get(self, request, pk):
-        bills = Bill.objects.raw('SELECT * FROM api_bill WHERE client_id_id = %s', [pk])
-        serializer = BillSerializer(bills, many=True)
-        return Response(serializer.data)
-
     def put(self, request, pk):
         bill_saved = get_object_or_404(Bill.objects.all(), pk=pk)
         data = request.data
@@ -105,4 +95,28 @@ class BillDetailView(APIView):
         bill.delete()
         return Response({"message": "Bill with id `{}` has been deleted.".format(pk)}, status=204)
 
+
+class BillByClientIdView(APIView):
+    """
+    Class for manage Bill by client id
+    """
+    def get(self, request, pk):
+        bills = Bill.objects.raw('SELECT * FROM api_bill WHERE client_id_id = %s', [pk])
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data)
+
+
+class ProductsByBillView(APIView):
+    """
+    Class for manage Bill with
+    """
+    def get(self, request, pk):
+        bills = BillProducts.objects.raw('SELECT * FROM api_billproducts WHERE bill_id_id = %s', [pk])
+        serializer = BillProductsSerializer(bills, many=True)
+        list_products = []
+        for obj in serializer.data:
+            product = Product.objects.raw('SELECT * FROM api_product WHERE id = %s', [obj.get('product_id')])
+            product_serializer = ProductSerializer(product, many=True)
+            list_products.append(product_serializer.data)
+        return Response(list_products)
 
